@@ -1,0 +1,6 @@
+dash==1.18.1
+numpy==1.19.5
+pandas==1.2.0
+scipy==1.6.0
+geojsoncontour==0.4.0
+influxdb==5.3.1
