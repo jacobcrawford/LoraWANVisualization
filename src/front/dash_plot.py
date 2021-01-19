@@ -23,7 +23,8 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 app.layout = html.Div([
     html.Div("Select date interval to show only data collected in that interval"),
-    dcc.DatePickerRange(
+    html.Div([
+        dcc.DatePickerRange(
         id='my-date-picker-range',
         min_date_allowed=date(2021, 1, 12),
         max_date_allowed=date.today(),
@@ -31,12 +32,17 @@ app.layout = html.Div([
         end_date=date.today(),
         start_date=date(2021, 1, 12)
     ),
+    ]),
     html.Div("Select device_id to show only data collected by that device"),
-    dcc.Dropdown(
-        id='device-id-dropdown',
-        options=device_selectors,
-        value='None',
+    html.Div(
+        style={'width': "400px"},
+        children=[
+            dcc.Dropdown(
+            id='device-id-dropdown',
+            options=device_selectors,
+            value='None',
     ),
+    ]),
     dcc.Graph(id='graph-id')
 ])
 
