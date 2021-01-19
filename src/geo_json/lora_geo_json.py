@@ -9,9 +9,6 @@ from numpy import linspace
 from plotly.offline import iplot
 from scipy.interpolate import griddata
 
-import random as r
-
-
 from src.storage import loradb_connecter
 
 def roundToTen(x):
@@ -60,8 +57,8 @@ def getTestData():
     x = [t[1] for t in input_data]
     return x,y,z
 
-def getLoraGEOJson(device_id=None,from_time=None, to_time=None):
-    data = loradb_connecter.get(device_id=device_id,from_time=from_time, to_time=to_time)
+def getLoraGEOJson(device_id=None,from_time=None, to_time=None,gateway_id=None):
+    data = loradb_connecter.get(device_id=device_id,gateway_id=gateway_id,from_time=from_time, to_time=to_time)
 
     x,y,z = extractDataFromloraDBConnecterResults(data)
 
