@@ -21,11 +21,18 @@ def get(device_id=None,from_time=None, to_time=None):
             query_string += f' WHERE "device_id" = \'{device_id}\''
             first = False 
         else: 
-            query_string += ' AND "device_id" = \'{device_id}\''
+            query_string += f' AND "device_id" = \'{device_id}\''
     result_dict = client.query(query_string)
     result = pd.concat(result_dict, axis=1)
     result.columns = result.columns.droplevel() 
     return result
+
+def getAllUniqueDeviceIds():
+    query_string = 'SELECT distinct("device_id") FROM "adeunis-gps"'
+    result_dict = client.query(query_string)
+    result = pd.concat(result_dict, axis=1)
+    result.columns = result.columns.droplevel() 
+    return list(result['distinct'])
 
 
 

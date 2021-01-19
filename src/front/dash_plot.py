@@ -7,6 +7,7 @@ import dash_html_components as html
 import plotly.express as px
 
 from src.geo_json.lora_geo_json import getLoraGEOJson
+from src.storage import loradb_connecter
 
 # https://plotly.github.io/plotly.py-docs/generated/plotly.express.choropleth_mapbox.html
 
@@ -14,10 +15,14 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 center_coors = 55.579209, 9.510841 #TODO plot another center
 
+device_ids = loradb_connecter.getAllUniqueDeviceIds()
+device_selectors = [{'label':device_id, 'value': device_id } for device_id in device_ids]
+device_selectors.append({'label':"Show all", 'value': 'None'})
+
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 app.layout = html.Div([
-    html.Div(id='output-container-date-picker-range'),
+    html.Div("Select date interval to show only data collected in that interval"),
     dcc.DatePickerRange(
         id='my-date-picker-range',
         min_date_allowed=date(2021, 1, 12),
@@ -26,36 +31,24 @@ app.layout = html.Div([
         end_date=date.today(),
         start_date=date(2021, 1, 12)
     ),
+    html.Div("Select device_id to show only data collected by that device"),
+    dcc.Dropdown(
+        id='device-id-dropdown',
+        options=device_selectors,
+        value='None',
+    ),
     dcc.Graph(id='graph-id')
 ])
-
-
-@ app.callback(
-    dash.dependencies.Output('output-container-date-picker-range', 'children'),
-    [dash.dependencies.Input('my-date-picker-range', 'start_date'),
-     dash.dependencies.Input('my-date-picker-range', 'end_date')])
-def update_output(start_date, end_date):
-    string_prefix = 'You have selected: '
-    if start_date is not None:
-        start_date_object = date.fromisoformat(start_date)
-        start_date_string = start_date_object.strftime('%B %d, %Y')
-        string_prefix = string_prefix + 'Start Date: ' + start_date_string + ' | '
-    if end_date is not None:
-        end_date_object = date.fromisoformat(end_date)
-        end_date_string = end_date_object.strftime('%B %d, %Y')
-        string_prefix = string_prefix + 'End Date: ' + end_date_string
-    if len(string_prefix) == len('You have selected: '):
-        return 'Select a date to see it displayed here'
-    else:
-        return string_prefix
 
 @ app.callback(
     dash.dependencies.Output('graph-id', 'figure'),
     [dash.dependencies.Input('my-date-picker-range', 'start_date'),
-     dash.dependencies.Input('my-date-picker-range', 'end_date')]
+     dash.dependencies.Input('my-date-picker-range', 'end_date'),
+     dash.dependencies.Input('device-id-dropdown', 'value')]
 )
-def refreshGraph(start_date, end_date):
-    geojson, df = getLoraGEOJson(from_time=start_date, to_time=end_date)
+def refreshGraph(start_date, end_date, value):
+    device_id = str(value) if value != 'None' else None
+    geojson, df = getLoraGEOJson(from_time=start_date, to_time=end_date,device_id=device_id)
     fig = px.choropleth_mapbox(
         df, geojson=geojson,
         locations="Signal",
