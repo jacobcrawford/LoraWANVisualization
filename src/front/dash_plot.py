@@ -62,7 +62,7 @@ def refreshGraph(start_date, end_date, value):
         center={"lat": center_coors[0], "lon": center_coors[1]},
         zoom=8,
         color="Signal",
-        range_color=(-160, -50),
+        range_color=(-140, -50),
         opacity=0.5,
         height=800,
         width=800)
