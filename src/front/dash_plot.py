@@ -24,6 +24,8 @@ device_selectors.append({'label':"Show all", 'value': 'None'})
 gateway_selectors = [{'label':gateway_id, 'value': gateway_id } for gateway_id in loradb_connecter.getAllUniqueGatewayIds()]
 gateway_selectors.append({'label':"Show all", 'value': 'None'})
 
+interpolation_selectors= [{'label':'linear', 'value':"linear"},{'label':'nearest', 'value':"nearest"}]
+
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 app.layout = html.Div([
@@ -58,6 +60,16 @@ app.layout = html.Div([
             value='None'),
             ]
     ),
+    html.Div("Select how data points should be interpolated"),
+    html.Div(
+        style={'width': "400px"},
+        children=[
+            dcc.Dropdown(
+            id='interpolate-id-dropdown',
+            options=interpolation_selectors,
+            value=interpolation_selectors[0]["value"]),
+            ]
+    ),
     dcc.Graph(id='graph-id'),
     html.Div(id="update-id"),
     dcc.Interval(
@@ -73,14 +85,15 @@ app.layout = html.Div([
      dash.dependencies.Input('my-date-picker-range', 'end_date'),
      dash.dependencies.Input('device-id-dropdown', 'value'),
      dash.dependencies.Input('gateway-id-dropdown', 'value'),
+     dash.dependencies.Input('interpolate-id-dropdown', 'value'),
      dash.dependencies.Input('interval-component', 'n_intervals'),
      ]
 )
-def refreshGraph(start_date, end_date, device_id_selected,gateway_id_selected,_):
+def refreshGraph(start_date, end_date, device_id_selected,gateway_id_selected,interpolation_selected,_):
     device_id = str( device_id_selected) if  device_id_selected != 'None' else None
     gateway_id = str( gateway_id_selected) if  gateway_id_selected != 'None' else None
 
-    geojson, df = getLoraGEOJson(from_time=start_date, to_time=end_date,device_id=device_id, gateway_id=gateway_id)
+    geojson, df = getLoraGEOJson(from_time=start_date, to_time=end_date,device_id=device_id, gateway_id=gateway_id, interpolate_method=interpolation_selected)
     fig = px.choropleth_mapbox(
         df, geojson=geojson,
         locations="Signal",
@@ -94,7 +107,9 @@ def refreshGraph(start_date, end_date, device_id_selected,gateway_id_selected,_)
         width=800)
     fig.update_layout(
         margin={"r": 0, "t": 0, "l": 0, "b": 0},
-        mapbox_style="carto-positron"),
+        mapbox_style="carto-positron",
+        uirevision = True)
+        
     return fig
 
 

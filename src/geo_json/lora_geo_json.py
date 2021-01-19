@@ -57,7 +57,7 @@ def getTestData():
     x = [t[1] for t in input_data]
     return x,y,z
 
-def getLoraGEOJson(device_id=None,from_time=None, to_time=None,gateway_id=None):
+def getLoraGEOJson(device_id=None,from_time=None, to_time=None,gateway_id=None,interpolate_method="linear"):
     data = loradb_connecter.get(device_id=device_id,gateway_id=gateway_id,from_time=from_time, to_time=to_time)
 
     x,y,z = extractDataFromloraDBConnecterResults(data)
@@ -65,7 +65,7 @@ def getLoraGEOJson(device_id=None,from_time=None, to_time=None,gateway_id=None):
     # Interpolating values to get better coverage
     xi = linspace(min(x), max(x), 100)
     yi = linspace(min(y), max(y), 100)
-    zi = griddata((x, y), z, (xi[None, :], yi[:, None]), method='linear')
+    zi = griddata((x, y), z, (xi[None, :], yi[:, None]), method=interpolate_method)
 
     check = [np.Inf if np.isnan(i) else i for i in zi.flatten()]
     min_value = min(check)
